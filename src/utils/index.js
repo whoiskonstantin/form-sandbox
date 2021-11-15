@@ -12,7 +12,10 @@ export function mockSubmitRequest() {
       if (isSuccess) {
         return resolve({ code: 200, message: "User created" });
       }
-      return reject({ code: 400, message: "User already exists" });
+      return reject({
+        code: 500,
+        message: "Unknown error occured. Try again later."
+      });
     }, 1500);
   });
 

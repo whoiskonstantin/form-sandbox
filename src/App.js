@@ -7,38 +7,73 @@ import ErrorMessage from "./components/ErrorMessage.js";
 import { mockSubmitRequest } from "./utils/index.js";
 import "./styles.css";
 
+const errorInitialState = { username: "", password: "", api: "" };
+
 export default function App() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({ username: "", password: "" });
+  const [errors, setErrors] = useState(errorInitialState);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUserSignedIn, setIsUserSignedIn] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
+    // Validation logic...
+    if (!userName && !password) {
+      setErrors({
+        username: "Username is required",
+        password: "Password is required"
+      });
+      return;
+    }
+
+    if (!userName) {
+      setErrors({ ...errorInitialState, username: "Username is required" });
+      return;
+    }
 
     if (!password) {
-      setErrors({ ...errors, password: "Password is required" });
+      setErrors({ ...errorInitialState, password: "Password is required" });
+      return;
     }
+
     setIsLoading(true);
+
     const response = mockSubmitRequest();
 
     try {
-      console.log(await response);
+      await response;
+      setErrors(errorInitialState);
+      setIsUserSignedIn(true);
     } catch (error) {
-      console.log("error", error);
+      setErrors({ ...errorInitialState, api: error.message });
     }
     setIsLoading(false);
   }
 
   return (
     <div className="App">
-      <h1>Sign up</h1>
-      <form>
-        <InputField name={"Username"} value={userName} setValue={setUserName} />
-        <InputField name={"Password"} value={password} setValue={setPassword} />
-        <ErrorMessage errors={errors} />
-        <SubmitButton handleSubmit={handleSubmit} isLoading={isLoading} />
-      </form>
+      {isUserSignedIn ? (
+        <h1>Thanks for singing up!</h1>
+      ) : (
+        <>
+          <h1>Sign up</h1>
+          <form>
+            <InputField
+              name={"Username"}
+              value={userName}
+              setValue={setUserName}
+            />
+            <InputField
+              name={"Password"}
+              value={password}
+              setValue={setPassword}
+            />
+            <ErrorMessage errors={errors} />
+            <SubmitButton handleSubmit={handleSubmit} isLoading={isLoading} />
+          </form>
+        </>
+      )}
     </div>
   );
 }
